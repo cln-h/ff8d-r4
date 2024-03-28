@@ -1,10 +1,29 @@
 #include <WiFiS3.h>
 
+#include <vector>
+
 #include "arduino_secrets.h"
 
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 int status = WL_IDLE_STATUS;
+
+struct Route {
+  String path;
+  void (*callback)();
+};
+class WebServer {
+  private:
+    WiFiServer server;
+    std::vector<Route> routes;
+
+  public:
+    WebServer(int port) : server(port) {}
+  
+    // addRoute() {}
+    // send() {}
+    // handle 404 in some way
+};
 
 long getWiFiSignalStrength() {
   long rssi = WiFi.RSSI();
@@ -43,10 +62,10 @@ void setup() {
     long rssi = getWiFiSignalStrength();
     Serial.print("Signal strength (RSSI): ");
     Serial.println(rssi);
+
+    // server.begin(); // TODO
   }
 }
 
 void loop() {
-  delay(1000);
-  Serial.println("...");
 }
