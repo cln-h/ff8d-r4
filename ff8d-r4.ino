@@ -1,3 +1,4 @@
+#include <Servo.h>
 #include <WiFiS3.h>
 
 #include <vector>
@@ -7,6 +8,11 @@
 char ssid[] = SECRET_SSID;
 char pass[] = SECRET_PASS;
 int status = WL_IDLE_STATUS;
+
+Servo primerServo;
+int primerServoPin = 2;
+Servo triggerServo;
+int triggerServoPin = 4;
 
 struct Route {
   String path;
@@ -18,10 +24,6 @@ class WebServer {
     WiFiServer server;
     WiFiClient client;
     std::vector<Route> routes;
-
-    void handleNotFound() {
-
-    }
 
     String translateStatusCode(int statusCode) {
       switch (statusCode) {
@@ -93,6 +95,50 @@ long getWiFiSignalStrength() {
   return rssi;
 }
 
+void attachServo(Servo &servo, int pin) {
+  if (!servo.attached()) {
+    servo.attach(pin);
+  }
+}
+
+void detachServo(Servo &servo, int pin) {
+  if (servo.attached()) {
+    servo.detach();
+  }
+}
+
+void resetServoPositions() {
+  if (triggerServo.attached() && primerServo.attached()) {
+    triggerServo.write(0);
+    primerServo.write(0);
+  } else {
+    Serial.println("Servo motors not attached!");
+  }
+}
+
+void handleServoTrigger() {
+  attachServo(triggerServo, triggerServoPin);
+  attachServo(primerServo, primerServoPin);
+
+  resetServoPositions();
+  delay(500);
+
+  primerServo.write(90);
+  delay(500);
+  triggerServo.write(90);
+  delay(1000);
+  resetServoPositions();
+
+  detachServo(triggerServo, triggerServoPin);
+  detachServo(primerServo, primerServoPin);
+}
+
+void handleServo() {
+  handleServoTrigger();
+
+  server.send(200, "text/plain", "");
+}
+
 void handleRoot() {
   server.send(200, "text/plain", "FF8D-R4 ONLINE");
 }
@@ -131,6 +177,7 @@ void setup() {
     Serial.println(rssi);
 
     server.addRoute("/", handleRoot);
+    server.addRoute("/servo", handleServo);
 
     server.begin();
   }
