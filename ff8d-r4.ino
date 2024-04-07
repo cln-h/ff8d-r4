@@ -61,31 +61,34 @@ class WebServer {
       server.begin();
     }
 
-    void handleClient() {
-      client = server.available();
-      if (client) {
-        while (client.connected()) {
-          if (client.available()) {
-            String request = client.readStringUntil('\r');
-            client.flush();
-            bool routeFound = false;
-            for (const auto& route : routes) {
-              if (request.indexOf(route.path) != -1) {
-                route.callback();
-                routeFound = true;
-                break;
-              }
+  void handleClient() {
+    client = server.available();
+    if (client) {
+      while (client.connected()) {
+        if (client.available()) {
+          String request = client.readStringUntil('\r');
+          client.flush();
+          bool routeFound = false;
+          // Extract the HTTP method and route path
+          String httpMethod = request.substring(0, request.indexOf(' '));
+          String path = request.substring(request.indexOf(' ') + 1, request.indexOf(' ', request.indexOf(' ') + 1));
+          for (const auto& route : routes) {
+            // Check if the route path matches and the HTTP method is GET
+            if (path == route.path && httpMethod == "GET") {
+              route.callback();
+              routeFound = true;
+              break;
             }
-
-            if (!routeFound) {
-              handleNotFound();
-            }
-            break;
           }
+          if (!routeFound) {
+            handleNotFound();
+          }
+          break;
         }
-        client.stop();
       }
+      client.stop();
     }
+  }
 };
 
 WebServer server(80);
@@ -126,12 +129,12 @@ void handleServoTrigger() {
   attachServo(primerServo, primerServoPin);
 
   resetServoPositions();
-  delay(500);
+  delay(5000);
 
   primerServo.write(90);
-  delay(500);
+  delay(3500);
   triggerServo.write(90);
-  delay(1000);
+  delay(3000);
   resetServoPositions();
 
   detachServo(triggerServo, triggerServoPin);
@@ -141,7 +144,7 @@ void handleServoTrigger() {
 void handleServo() {
   handleServoTrigger();
 
-  server.send(200, "text/plain", "");
+  server.send(200, "text/plain", "Triggered Servos Motors.");
 }
 
 void handleRoot() {
