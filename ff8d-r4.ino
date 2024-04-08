@@ -109,7 +109,7 @@ void attachServo(Servo &servo, int pin) {
   }
 }
 
-void detachServo(Servo &servo, int pin) {
+void detachServo(Servo &servo) {
   if (servo.attached()) {
     servo.detach();
   }
@@ -117,8 +117,12 @@ void detachServo(Servo &servo, int pin) {
 
 void resetServoPositions() {
   if (triggerServo.attached() && primerServo.attached()) {
-    triggerServo.write(0);
-    primerServo.write(0);
+    if (triggerServo.read() != 0) {
+      triggerServo.write(0);
+    }
+    if (primerServo.read() != 0) {
+      primerServo.write(0);
+    }
   } else {
     Serial.println("Servo motors not attached!");
   }
@@ -129,16 +133,20 @@ void handleServoTrigger() {
   attachServo(primerServo, primerServoPin);
 
   resetServoPositions();
-  delay(5000);
+
+  delay(2000);
 
   primerServo.write(90);
-  delay(3500);
+  delay(2500);
   triggerServo.write(90);
-  delay(3000);
-  resetServoPositions();
+  delay(2500);
+  triggerServo.write(0);
+  delay(2000);
+  primerServo.write(0);
+  delay(1000);
 
-  detachServo(triggerServo, triggerServoPin);
-  detachServo(primerServo, primerServoPin);
+  detachServo(triggerServo);
+  detachServo(primerServo);
 }
 
 void handleServo() {
