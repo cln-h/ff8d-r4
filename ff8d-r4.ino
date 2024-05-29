@@ -117,8 +117,8 @@ void detachServo(Servo &servo) {
 
 void resetServoPositions() {
   if (triggerServo.attached() && primerServo.attached()) {
-    if (triggerServo.read() != 0) {
-      triggerServo.write(0);
+    if (triggerServo.read() != 65) {
+      triggerServo.write(65);
     }
     if (primerServo.read() != 0) {
       primerServo.write(0);
@@ -134,16 +134,16 @@ void handleServoTrigger() {
 
   resetServoPositions();
 
-  delay(2000);
-
-  primerServo.write(90);
-  delay(2500);
-  triggerServo.write(90);
-  delay(2500);
-  triggerServo.write(0);
-  delay(2000);
-  primerServo.write(0);
   delay(1000);
+
+  primerServo.write(50);
+  delay(500);
+  triggerServo.write(0);
+  delay(500);
+  triggerServo.write(65);
+  delay(400);
+  primerServo.write(0);
+  delay(250);
 
   detachServo(triggerServo);
   detachServo(primerServo);
